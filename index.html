@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ขอรับปริญญาบัตร วังท่าพระ</title>
+  <link rel="stylesheet" href="styles.css?v=1">
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="config.js?v=1"></script>
+  <script src="common.js?v=1"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><div class="logo">🎓</div>ขอรับปริญญาบัตร</div>
+    <div class="spacer"></div>
+    <div class="user" id="userBox"></div>
+    <button class="icon-btn" id="themeBtn" type="button"></button>
+  </header>
+
+  <main class="container">
+    <div id="loadingView"><div class="spinner"></div></div>
+
+    <section id="loginView" class="card center" hidden>
+      <h2>ขอรับปริญญาบัตร ที่วังท่าพระ</h2>
+      <p class="muted">เข้าสู่ระบบด้วย LINE เพื่อยื่นคำร้องและรับการแจ้งเตือนสถานะผ่าน LINE</p>
+      <button class="btn line" id="loginBtn" type="button">เข้าสู่ระบบด้วย LINE</button>
+    </section>
+
+    <section id="appView" hidden>
+      <nav class="tabs">
+        <button type="button" data-tab="form" class="active">ยื่นคำร้อง</button>
+        <button type="button" data-tab="mine">คำร้องของฉัน <span class="count" id="mineCount" hidden></span></button>
+      </nav>
+
+      <div id="tab-form">
+        <div class="notice success" id="successBox" hidden></div>
+
+        <form id="reqForm" novalidate>
+          <div class="card form-head">
+            <h1>ขอรับใบปริญญาบัตร ที่วังท่าพระ</h1>
+            <p><b>เอกสารที่ต้องนำมาในวันรับปริญญาบัตร</b></p>
+            <ol class="info-list">
+              <li>รับด้วยตนเอง: สำเนาบัตรประชาชน 1 ฉบับ</li>
+              <li>ผู้ปกครองรับแทน: สำเนาบัตรประชาชนของนักศึกษา 1 ฉบับ และสำเนาบัตรประชาชนของผู้ปกครอง 1 ฉบับ</li>
+              <li>หากยังไม่ได้ยื่นขอคืนเงินค่าประกันของเสียหาย 1,500 บาท ให้เตรียม
+                <ol type="i">
+                  <li>แบบฟอร์มคำร้องขอคืนเงินค่าประกันของเสียหาย</li>
+                  <li>สำเนาบัตรประชาชน</li>
+                  <li>สำเนาหน้าสมุดบัญชีธนาคาร (ยกเว้น ธ.ออมสิน, ธอส., ธกส.)</li>
+                </ol>
+              </li>
+            </ol>
+            <p class="small muted" style="margin-top:12px">ปริญญาบัตรอยู่ที่พระราชวังสนามจันทร์ จังหวัดนครปฐม ระบบจัดส่งไปยังกองบริหารงานวิชาการ วังท่าพระ
+              ทุกวันจันทร์–ศุกร์ (เว้นวันหยุดนักขัตฤกษ์) <b>ตัดรอบเวลา 09:00 น.</b> คำร้องที่ส่งหลัง 09:00 น. จะจัดส่งในวันทำการถัดไป</p>
+            <div class="round-box" id="roundBox"></div>
+            <p class="req small">* ระบุว่าเป็นคำถามที่จำเป็น</p>
+          </div>
+
+          <div class="card q-card">
+            <div class="q-title" id="prefixTitle">คำนำหน้า <span class="req">*</span></div>
+            <div class="radio-list" id="prefixList" role="radiogroup" aria-labelledby="prefixTitle"></div>
+            <input class="input prefix-other" id="prefixOther" maxlength="50" placeholder="ระบุคำนำหน้า เช่น ว่าที่ร้อยตรี" hidden>
+          </div>
+
+          <div class="card q-card">
+            <div class="q-title">ชื่อ - นามสกุล <span class="req">*</span></div>
+            <div class="name-row">
+              <div>
+                <label class="sub-label" for="firstName">ชื่อ</label>
+                <input class="input" id="firstName" maxlength="100" autocomplete="given-name" placeholder="ชื่อ" required>
+              </div>
+              <div>
+                <label class="sub-label" for="lastName">นามสกุล</label>
+                <input class="input" id="lastName" maxlength="100" autocomplete="family-name" placeholder="นามสกุล" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="card q-card">
+            <label class="q-title" for="studentId">รหัสนักศึกษา <span class="req">*</span></label>
+            <input class="input" id="studentId" inputmode="numeric" maxlength="12" placeholder="คำตอบของคุณ" required>
+          </div>
+
+          <div class="card q-card">
+            <label class="q-title" for="phone">เบอร์โทรที่สามารถติดต่อได้ <span class="req">*</span></label>
+            <input class="input" id="phone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="เช่น 0812345678" required>
+          </div>
+
+          <div class="card q-card">
+            <label class="ack">
+              <input type="checkbox" id="ack">
+              <span>ข้าพเจ้ารับทราบเอกสารที่ต้องนำมาในวันรับปริญญาบัตร <span class="req">*</span></span>
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn primary" id="submitBtn" type="submit">ส่ง</button>
+            <button class="btn link" id="clearBtn" type="button">ล้างแบบฟอร์ม</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="tab-mine" hidden>
+        <div id="mineList"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="user.js?v=1"></script>
+</body>
+</html>

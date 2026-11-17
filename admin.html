@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ผู้ดูแล · ปริญญาบัตร</title>
+  <link rel="stylesheet" href="styles.css?v=1">
+  <script src="config.js?v=1"></script>
+  <script src="common.js?v=1"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><div class="logo">🎓</div>ผู้ดูแล · ขอรับปริญญาบัตร วังท่าพระ</div>
+    <div class="spacer"></div>
+    <button class="btn sm" id="logoutBtn" type="button" hidden>ออกจากระบบ</button>
+    <button class="icon-btn" id="themeBtn" type="button"></button>
+  </header>
+
+  <main class="container wide">
+    <section id="loginView" class="card" style="max-width:400px;margin:40px auto">
+      <h2>เข้าสู่ระบบผู้ดูแล</h2>
+      <p class="muted small">สำหรับเจ้าหน้าที่ตรวจสอบและจัดการคำร้อง</p>
+      <form id="loginForm">
+        <div class="field">
+          <label for="password">รหัสผ่าน</label>
+          <input class="input" type="password" id="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn primary block" id="loginBtn" type="submit">เข้าสู่ระบบ</button>
+      </form>
+    </section>
+
+    <section id="dashView" hidden>
+      <div class="stats" id="stats"></div>
+
+      <div class="card">
+        <h2 class="print-only" id="printTitle"></h2>
+        <div class="toolbar">
+          <input class="input" id="search" type="search" placeholder="ค้นหา เลขที่คำร้อง / ชื่อ / รหัสนักศึกษา / เบอร์โทร">
+          <select class="input" id="roundFilter" style="flex:0 1 240px"><option value="">ทุกรอบจัดส่ง</option></select>
+          <select class="input" id="sortBy" style="flex:0 1 220px">
+            <option value="round">จัดกลุ่มตามรอบจัดส่ง</option>
+            <option value="newest">วันที่ยื่น (ล่าสุดก่อน)</option>
+            <option value="oldest">วันที่ยื่น (เก่าสุดก่อน)</option>
+            <option value="studentId">รหัสนักศึกษา</option>
+          </select>
+          <button class="btn sm" id="refreshBtn" type="button">รีเฟรช</button>
+          <button class="btn sm" id="exportBtn" type="button">ส่งออก CSV</button>
+          <button class="btn sm" id="printBtn" type="button">🖨️ พิมพ์รายชื่อ</button>
+        </div>
+        <div class="bulk-bar" id="bulkBar" hidden>
+          <span>เลือก <b id="bulkCount">0</b> รายการ →</span>
+          <select class="input" id="bulkStatus"></select>
+          <input class="input" id="bulkNote" maxlength="500" placeholder="หมายเหตุ (ไม่บังคับ)">
+          <button class="btn sm" id="bulkSaveBtn" type="button">💾 บันทึก</button>
+          <button class="btn sm primary" id="bulkNotifyBtn" type="button">🔔 บันทึก + แจ้ง LINE</button>
+          <button class="btn sm link" id="bulkClearBtn" type="button">ยกเลิกเลือก</button>
+        </div>
+        <div class="muted small" id="lastUpdated" style="margin-bottom:8px"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="check"><input type="checkbox" id="checkAll" aria-label="เลือกทั้งหมด"></th>
+                <th>เลขที่คำร้อง</th><th>ชื่อ - นามสกุล</th><th>รหัสนักศึกษา</th><th>เบอร์โทร</th>
+                <th>รอบจัดส่ง</th><th>วันที่ยื่น</th><th>สถานะ</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="emptyBox" hidden>ไม่พบคำร้อง</div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="dlg">
+    <div class="dlg-head">
+      <div><b id="dlgTitle"></b> <span id="dlgBadge"></span></div>
+      <button class="icon-btn" id="dlgClose" type="button" aria-label="ปิด">✕</button>
+    </div>
+    <div class="dlg-body single">
+      <div>
+        <dl class="kv" id="dlgInfo"></dl>
+        <form id="updateForm">
+          <div class="row">
+            <div class="field">
+              <label for="dlgStatus">เปลี่ยนสถานะ</label>
+              <select class="input" id="dlgStatus"></select>
+            </div>
+            <div class="field">
+              <label for="dlgRound">รอบจัดส่ง</label>
+              <input class="input" type="date" id="dlgRound">
+            </div>
+          </div>
+          <div class="field">
+            <label for="dlgNote">หมายเหตุ</label>
+            <textarea class="input" id="dlgNote" rows="3" maxlength="500" placeholder="เช่น ติดต่อรับได้ที่ห้องงานทะเบียน ในวันและเวลาราชการ"></textarea>
+          </div>
+          <div class="btn-row">
+            <button class="btn" id="saveBtn" type="submit">💾 บันทึก</button>
+            <button class="btn primary" id="notifyBtn" type="button">🔔 แจ้งเตือน</button>
+          </div>
+          <p class="muted small" style="margin:8px 0 0">บันทึก = เก็บสถานะ/หมายเหตุ ไม่ส่ง LINE · แจ้งเตือน = ส่งสถานะและหมายเหตุถึงผู้ยื่นทาง LINE (บันทึกให้ด้วยถ้ามีการเปลี่ยน)</p>
+        </form>
+        <details open>
+          <summary>ประวัติสถานะ</summary>
+          <div id="dlgHistory"></div>
+        </details>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="admin.js?v=1"></script>
+</body>
+</html>
