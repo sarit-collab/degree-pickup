@@ -24,6 +24,11 @@ async function init() {
       return;
     }
     idToken = liff.getIDToken();
+    if (!idToken) {
+      // เซสชันเก่ายังไม่มีสิทธิ์ openid → ล็อกอินใหม่เพื่อขอ ID token (ครั้งเดียวต่อนาที กันวนลูป)
+      if (relogin()) return;
+      UI.toast('ยืนยันตัวตน LINE ไม่สำเร็จ กรุณาปิดแล้วเปิดลิงก์ใหม่', 'error');
+    }
     const profile = await liff.getProfile();
     showApp(profile);
   } catch (e) {
@@ -55,20 +60,23 @@ async function callUser(action, data) {
   try {
     return await Api.call(action, Object.assign({ idToken }, data));
   } catch (e) {
-    if (e.code === 'TOKEN_EXPIRED' && !CONFIG.DEMO) {
-      // ล็อกอินใหม่ได้ครั้งเดียวต่อนาที กันวนลูปถ้าตั้งค่า channel ผิด
-      let last = 0;
-      try { last = Number(sessionStorage.getItem('relogin_at')) || 0; } catch (err) { /* ignore */ }
-      if (Date.now() - last > 60000) {
-        try { sessionStorage.setItem('relogin_at', String(Date.now())); } catch (err) { /* ignore */ }
-        liff.logout();
-        liff.login({ redirectUri: location.href });
-      } else {
-        UI.toast('ยืนยันตัวตน LINE ไม่สำเร็จ กรุณาติดต่อผู้ดูแลระบบ', 'error');
-      }
+    if ((e.code === 'TOKEN_EXPIRED' || e.code === 'AUTH') && !CONFIG.DEMO) {
+      if (relogin()) e.message = 'กำลังเข้าสู่ระบบ LINE ใหม่...';
+      else UI.toast('ยืนยันตัวตน LINE ไม่สำเร็จ กรุณาติดต่อผู้ดูแลระบบ', 'error');
     }
     throw e;
   }
+}
+
+/** ล็อกอิน LINE ใหม่ได้ครั้งเดียวต่อนาที กันวนลูปถ้าตั้งค่า channel ผิด — คืน true ถ้ากำลังพาไปล็อกอิน */
+function relogin() {
+  let last = 0;
+  try { last = Number(sessionStorage.getItem('relogin_at')) || 0; } catch (err) { /* ignore */ }
+  if (Date.now() - last < 60000) return false;
+  try { sessionStorage.setItem('relogin_at', String(Date.now())); } catch (err) { /* ignore */ }
+  liff.logout();
+  liff.login({ redirectUri: location.href });
+  return true;
 }
 
 function fillOptions() {

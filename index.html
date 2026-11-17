@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>ขอรับปริญญาบัตร วังท่าพระ</title>
-  <link rel="stylesheet" href="styles.css?v=1">
+  <title>เธเธญเธฃเธฑเธเธเธฃเธดเธเธเธฒเธเธฑเธ•เธฃ เธงเธฑเธเธ—เนเธฒเธเธฃเธฐ</title>
+  <link rel="stylesheet" href="styles.css?v=2">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="config.js?v=1"></script>
-  <script src="common.js?v=1"></script>
+  <script src="config.js?v=2"></script>
+  <script src="common.js?v=2"></script>
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><div class="logo">🎓</div>ขอรับปริญญาบัตร</div>
+    <div class="brand"><div class="logo">๐“</div>เธเธญเธฃเธฑเธเธเธฃเธดเธเธเธฒเธเธฑเธ•เธฃ</div>
     <div class="spacer"></div>
     <div class="user" id="userBox"></div>
     <button class="icon-btn" id="themeBtn" type="button"></button>
@@ -21,15 +21,15 @@
     <div id="loadingView"><div class="spinner"></div></div>
 
     <section id="loginView" class="card center" hidden>
-      <h2>ขอรับปริญญาบัตร ที่วังท่าพระ</h2>
-      <p class="muted">เข้าสู่ระบบด้วย LINE เพื่อยื่นคำร้องและรับการแจ้งเตือนสถานะผ่าน LINE</p>
-      <button class="btn line" id="loginBtn" type="button">เข้าสู่ระบบด้วย LINE</button>
+      <h2>เธเธญเธฃเธฑเธเธเธฃเธดเธเธเธฒเธเธฑเธ•เธฃ เธ—เธตเนเธงเธฑเธเธ—เนเธฒเธเธฃเธฐ</h2>
+      <p class="muted">เน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธเธ”เนเธงเธข LINE เน€เธเธทเนเธญเธขเธทเนเธเธเธณเธฃเนเธญเธเนเธฅเธฐเธฃเธฑเธเธเธฒเธฃเนเธเนเธเน€เธ•เธทเธญเธเธชเธ–เธฒเธเธฐเธเนเธฒเธ LINE</p>
+      <button class="btn line" id="loginBtn" type="button">เน€เธเนเธฒเธชเธนเนเธฃเธฐเธเธเธ”เนเธงเธข LINE</button>
     </section>
 
     <section id="appView" hidden>
       <nav class="tabs">
-        <button type="button" data-tab="form" class="active">ยื่นคำร้อง</button>
-        <button type="button" data-tab="mine">คำร้องของฉัน <span class="count" id="mineCount" hidden></span></button>
+        <button type="button" data-tab="form" class="active">เธขเธทเนเธเธเธณเธฃเนเธญเธ</button>
+        <button type="button" data-tab="mine">เธเธณเธฃเนเธญเธเธเธญเธเธเธฑเธ <span class="count" id="mineCount" hidden></span></button>
       </nav>
 
       <div id="tab-form">
@@ -37,65 +37,65 @@
 
         <form id="reqForm" novalidate>
           <div class="card form-head">
-            <h1>ขอรับใบปริญญาบัตร ที่วังท่าพระ</h1>
-            <p><b>เอกสารที่ต้องนำมาในวันรับปริญญาบัตร</b></p>
+            <h1>เธเธญเธฃเธฑเธเนเธเธเธฃเธดเธเธเธฒเธเธฑเธ•เธฃ เธ—เธตเนเธงเธฑเธเธ—เนเธฒเธเธฃเธฐ</h1>
+            <p><b>เน€เธญเธเธชเธฒเธฃเธ—เธตเนเธ•เนเธญเธเธเธณเธกเธฒเนเธเธงเธฑเธเธฃเธฑเธเธเธฃเธดเธเธเธฒเธเธฑเธ•เธฃ</b></p>
             <ol class="info-list">
-              <li>รับด้วยตนเอง: สำเนาบัตรประชาชน 1 ฉบับ</li>
-              <li>ผู้ปกครองรับแทน: สำเนาบัตรประชาชนของนักศึกษา 1 ฉบับ และสำเนาบัตรประชาชนของผู้ปกครอง 1 ฉบับ</li>
-              <li>หากยังไม่ได้ยื่นขอคืนเงินค่าประกันของเสียหาย 1,500 บาท ให้เตรียม
+              <li>เธฃเธฑเธเธ”เนเธงเธขเธ•เธเน€เธญเธ: เธชเธณเน€เธเธฒเธเธฑเธ•เธฃเธเธฃเธฐเธเธฒเธเธ 1 เธเธเธฑเธ</li>
+              <li>เธเธนเนเธเธเธเธฃเธญเธเธฃเธฑเธเนเธ—เธ: เธชเธณเน€เธเธฒเธเธฑเธ•เธฃเธเธฃเธฐเธเธฒเธเธเธเธญเธเธเธฑเธเธจเธถเธเธฉเธฒ 1 เธเธเธฑเธ เนเธฅเธฐเธชเธณเน€เธเธฒเธเธฑเธ•เธฃเธเธฃเธฐเธเธฒเธเธเธเธญเธเธเธนเนเธเธเธเธฃเธญเธ 1 เธเธเธฑเธ</li>
+              <li>เธซเธฒเธเธขเธฑเธเนเธกเนเนเธ”เนเธขเธทเนเธเธเธญเธเธทเธเน€เธเธดเธเธเนเธฒเธเธฃเธฐเธเธฑเธเธเธญเธเน€เธชเธตเธขเธซเธฒเธข 1,500 เธเธฒเธ— เนเธซเนเน€เธ•เธฃเธตเธขเธก
                 <ol type="i">
-                  <li>แบบฟอร์มคำร้องขอคืนเงินค่าประกันของเสียหาย</li>
-                  <li>สำเนาบัตรประชาชน</li>
-                  <li>สำเนาหน้าสมุดบัญชีธนาคาร (ยกเว้น ธ.ออมสิน, ธอส., ธกส.)</li>
+                  <li>เนเธเธเธเธญเธฃเนเธกเธเธณเธฃเนเธญเธเธเธญเธเธทเธเน€เธเธดเธเธเนเธฒเธเธฃเธฐเธเธฑเธเธเธญเธเน€เธชเธตเธขเธซเธฒเธข</li>
+                  <li>เธชเธณเน€เธเธฒเธเธฑเธ•เธฃเธเธฃเธฐเธเธฒเธเธ</li>
+                  <li>เธชเธณเน€เธเธฒเธซเธเนเธฒเธชเธกเธธเธ”เธเธฑเธเธเธตเธเธเธฒเธเธฒเธฃ (เธขเธเน€เธงเนเธ เธ.เธญเธญเธกเธชเธดเธ, เธเธญเธช., เธเธเธช.)</li>
                 </ol>
               </li>
             </ol>
-            <p class="small muted" style="margin-top:12px">ปริญญาบัตรอยู่ที่พระราชวังสนามจันทร์ จังหวัดนครปฐม ระบบจัดส่งไปยังกองบริหารงานวิชาการ วังท่าพระ
-              ทุกวันจันทร์–ศุกร์ (เว้นวันหยุดนักขัตฤกษ์) <b>ตัดรอบเวลา 09:00 น.</b> คำร้องที่ส่งหลัง 09:00 น. จะจัดส่งในวันทำการถัดไป</p>
+            <p class="small muted" style="margin-top:12px">เธเธฃเธดเธเธเธฒเธเธฑเธ•เธฃเธญเธขเธนเนเธ—เธตเนเธเธฃเธฐเธฃเธฒเธเธงเธฑเธเธชเธเธฒเธกเธเธฑเธเธ—เธฃเน เธเธฑเธเธซเธงเธฑเธ”เธเธเธฃเธเธเธก เธฃเธฐเธเธเธเธฑเธ”เธชเนเธเนเธเธขเธฑเธเธเธญเธเธเธฃเธดเธซเธฒเธฃเธเธฒเธเธงเธดเธเธฒเธเธฒเธฃ เธงเธฑเธเธ—เนเธฒเธเธฃเธฐ
+              เธ—เธธเธเธงเธฑเธเธเธฑเธเธ—เธฃเนโ€“เธจเธธเธเธฃเน (เน€เธงเนเธเธงเธฑเธเธซเธขเธธเธ”เธเธฑเธเธเธฑเธ•เธคเธเธฉเน) <b>เธ•เธฑเธ”เธฃเธญเธเน€เธงเธฅเธฒ 09:00 เธ.</b> เธเธณเธฃเนเธญเธเธ—เธตเนเธชเนเธเธซเธฅเธฑเธ 09:00 เธ. เธเธฐเธเธฑเธ”เธชเนเธเนเธเธงเธฑเธเธ—เธณเธเธฒเธฃเธ–เธฑเธ”เนเธ</p>
             <div class="round-box" id="roundBox"></div>
-            <p class="req small">* ระบุว่าเป็นคำถามที่จำเป็น</p>
+            <p class="req small">* เธฃเธฐเธเธธเธงเนเธฒเน€เธเนเธเธเธณเธ–เธฒเธกเธ—เธตเนเธเธณเน€เธเนเธ</p>
           </div>
 
           <div class="card q-card">
-            <div class="q-title" id="prefixTitle">คำนำหน้า <span class="req">*</span></div>
+            <div class="q-title" id="prefixTitle">เธเธณเธเธณเธซเธเนเธฒ <span class="req">*</span></div>
             <div class="radio-list" id="prefixList" role="radiogroup" aria-labelledby="prefixTitle"></div>
-            <input class="input prefix-other" id="prefixOther" maxlength="50" placeholder="ระบุคำนำหน้า เช่น ว่าที่ร้อยตรี" hidden>
+            <input class="input prefix-other" id="prefixOther" maxlength="50" placeholder="เธฃเธฐเธเธธเธเธณเธเธณเธซเธเนเธฒ เน€เธเนเธ เธงเนเธฒเธ—เธตเนเธฃเนเธญเธขเธ•เธฃเธต" hidden>
           </div>
 
           <div class="card q-card">
-            <div class="q-title">ชื่อ - นามสกุล <span class="req">*</span></div>
+            <div class="q-title">เธเธทเนเธญ - เธเธฒเธกเธชเธเธธเธฅ <span class="req">*</span></div>
             <div class="name-row">
               <div>
-                <label class="sub-label" for="firstName">ชื่อ</label>
-                <input class="input" id="firstName" maxlength="100" autocomplete="given-name" placeholder="ชื่อ" required>
+                <label class="sub-label" for="firstName">เธเธทเนเธญ</label>
+                <input class="input" id="firstName" maxlength="100" autocomplete="given-name" placeholder="เธเธทเนเธญ" required>
               </div>
               <div>
-                <label class="sub-label" for="lastName">นามสกุล</label>
-                <input class="input" id="lastName" maxlength="100" autocomplete="family-name" placeholder="นามสกุล" required>
+                <label class="sub-label" for="lastName">เธเธฒเธกเธชเธเธธเธฅ</label>
+                <input class="input" id="lastName" maxlength="100" autocomplete="family-name" placeholder="เธเธฒเธกเธชเธเธธเธฅ" required>
               </div>
             </div>
           </div>
 
           <div class="card q-card">
-            <label class="q-title" for="studentId">รหัสนักศึกษา <span class="req">*</span></label>
-            <input class="input" id="studentId" inputmode="numeric" maxlength="12" placeholder="คำตอบของคุณ" required>
+            <label class="q-title" for="studentId">เธฃเธซเธฑเธชเธเธฑเธเธจเธถเธเธฉเธฒ <span class="req">*</span></label>
+            <input class="input" id="studentId" inputmode="numeric" maxlength="12" placeholder="เธเธณเธ•เธญเธเธเธญเธเธเธธเธ“" required>
           </div>
 
           <div class="card q-card">
-            <label class="q-title" for="phone">เบอร์โทรที่สามารถติดต่อได้ <span class="req">*</span></label>
-            <input class="input" id="phone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="เช่น 0812345678" required>
+            <label class="q-title" for="phone">เน€เธเธญเธฃเนเนเธ—เธฃเธ—เธตเนเธชเธฒเธกเธฒเธฃเธ–เธ•เธดเธ”เธ•เนเธญเนเธ”เน <span class="req">*</span></label>
+            <input class="input" id="phone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="เน€เธเนเธ 0812345678" required>
           </div>
 
           <div class="card q-card">
             <label class="ack">
               <input type="checkbox" id="ack">
-              <span>ข้าพเจ้ารับทราบเอกสารที่ต้องนำมาในวันรับปริญญาบัตร <span class="req">*</span></span>
+              <span>เธเนเธฒเธเน€เธเนเธฒเธฃเธฑเธเธ—เธฃเธฒเธเน€เธญเธเธชเธฒเธฃเธ—เธตเนเธ•เนเธญเธเธเธณเธกเธฒเนเธเธงเธฑเธเธฃเธฑเธเธเธฃเธดเธเธเธฒเธเธฑเธ•เธฃ <span class="req">*</span></span>
             </label>
           </div>
 
           <div class="form-actions">
-            <button class="btn primary" id="submitBtn" type="submit">ส่ง</button>
-            <button class="btn link" id="clearBtn" type="button">ล้างแบบฟอร์ม</button>
+            <button class="btn primary" id="submitBtn" type="submit">เธชเนเธ</button>
+            <button class="btn link" id="clearBtn" type="button">เธฅเนเธฒเธเนเธเธเธเธญเธฃเนเธก</button>
           </div>
         </form>
       </div>
@@ -106,6 +106,6 @@
     </section>
   </main>
 
-  <script src="user.js?v=1"></script>
+  <script src="user.js?v=2"></script>
 </body>
 </html>
