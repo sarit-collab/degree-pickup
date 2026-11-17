@@ -37,14 +37,52 @@ const Round = {
     }).formatToParts(date).forEach(x => { p[x.type] = x.value; });
     return p;
   },
+  // วันหยุด (yyyy-MM-dd → ชื่อ) ตั้งจาก publicConfig / adminHolidays
+  holidays: {},
+  setHolidays(list) {
+    Round.holidays = {};
+    (list || []).forEach(h => { Round.holidays[h.date] = h.name; });
+  },
+  today(now) {
+    const p = Round.bangkokParts(now || new Date());
+    return `${p.year}-${p.month}-${p.day}`;
+  },
+  add(ymd, n) {
+    const [y, m, d] = ymd.split('-').map(Number);
+    return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
+  },
+  dow(ymd) {
+    const [y, m, d] = ymd.split('-').map(Number);
+    return new Date(Date.UTC(y, m - 1, d)).getUTCDay(); // 0=อาทิตย์
+  },
+  isWorkday(ymd) {
+    const w = Round.dow(ymd);
+    return w !== 0 && w !== 6 && !Round.holidays[ymd];
+  },
+  nextWorkday(ymd) {
+    let d = Round.add(ymd, 1);
+    for (let i = 0; i < 60 && !Round.isWorkday(d); i++) d = Round.add(d, 1);
+    return d;
+  },
+  /** รอบจัดส่งถ้าส่งคำร้องตอนนี้ */
   of(now) {
-    const isWeekend = d => ['Sat', 'Sun'].includes(Round.bangkokParts(d).weekday);
-    const p = Round.bangkokParts(now);
-    let d = new Date(now.getTime());
-    if (isWeekend(d) || Number(p.hour) >= CONFIG.CUTOFF_HOUR) d = new Date(d.getTime() + 86400000);
-    while (isWeekend(d)) d = new Date(d.getTime() + 86400000);
-    const q = Round.bangkokParts(d);
-    return `${q.year}-${q.month}-${q.day}`;
+    const today = Round.today(now);
+    const hour = Number(Round.bangkokParts(now).hour);
+    return Round.isWorkday(today) && hour < CONFIG.CUTOFF_HOUR ? today : Round.nextWorkday(today);
+  },
+  /** วันแรกที่นัดรับได้ = วันทำการถัดจากรอบจัดส่ง */
+  minPickup(now) {
+    return Round.nextWorkday(Round.of(now || new Date()));
+  },
+  /** ข้อความผิดพลาดของวันนัดรับ หรือ '' ถ้าใช้ได้ */
+  pickupError(ymd, min) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd || '')) return 'กรุณาเลือกวันที่';
+    if (ymd < min) return 'รับได้ตั้งแต่ ' + Round.thai(min, true) + ' เป็นต้นไป';
+    if (ymd > Round.add(min, CONFIG.PICKUP_MAX_DAYS)) return 'เลือกได้ไม่เกิน ' + CONFIG.PICKUP_MAX_DAYS + ' วันข้างหน้า';
+    if (Round.holidays[ymd]) return Round.thai(ymd, true) + ' เป็นวันหยุด (' + Round.holidays[ymd] + ') กรุณาเลือกวันอื่น';
+    const w = Round.dow(ymd);
+    if (w === 0 || w === 6) return 'งดรับวันเสาร์-อาทิตย์ กรุณาเลือกวันจันทร์-ศุกร์';
+    return '';
   },
   thai(ymd, long) {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ymd || ''));
@@ -60,6 +98,25 @@ const Round = {
 // โหมดทดลอง: จำลอง backend ด้วย localStorage
 const Demo = {
   KEY: 'demo_degree_requests',
+  HKEY: 'demo_degree_holidays',
+  loadHolidays() {
+    try {
+      const v = JSON.parse(localStorage.getItem(this.HKEY) || 'null');
+      if (v) return v;
+    } catch (e) { /* ignore */ }
+    return [
+      { date: '2026-12-07', name: 'ชดเชยวันพ่อแห่งชาติ' },
+      { date: '2026-12-10', name: 'วันรัฐธรรมนูญ' },
+      { date: '2026-12-31', name: 'วันสิ้นปี' },
+      { date: '2027-01-01', name: 'วันขึ้นปีใหม่' },
+    ];
+  },
+  saveHolidays(list) {
+    list.sort((a, b) => a.date < b.date ? -1 : 1);
+    try { localStorage.setItem(this.HKEY, JSON.stringify(list)); } catch (e) { /* ignore */ }
+    Round.setHolidays(list);
+    return list;
+  },
   load() {
     try { return JSON.parse(localStorage.getItem(this.KEY) || '[]'); } catch (e) { return []; }
   },
@@ -78,7 +135,29 @@ const Demo = {
     };
     const admin = () => { if (b.adminToken !== 'demo-admin') throw appError('กรุณาเข้าสู่ระบบใหม่', 'ADMIN_AUTH'); };
     switch (action) {
+      case 'publicConfig': {
+        const holidays = this.loadHolidays();
+        Round.setHolidays(holidays);
+        const min = Round.minPickup();
+        return { holidays, deliveryRound: Round.of(new Date()), minPickup: min, maxPickup: Round.add(min, CONFIG.PICKUP_MAX_DAYS) };
+      }
+      case 'adminHolidays':
+        admin();
+        return this.loadHolidays();
+      case 'adminAddHoliday': {
+        admin();
+        const list = this.loadHolidays();
+        if (list.some(h => h.date === b.date)) throw appError('มีวันหยุดวันที่นี้แล้ว', 'DUPLICATE');
+        list.push({ date: b.date, name: b.name || 'วันหยุด' });
+        return this.saveHolidays(list);
+      }
+      case 'adminDeleteHoliday':
+        admin();
+        return this.saveHolidays(this.loadHolidays().filter(h => h.date !== b.date));
       case 'submit': {
+        Round.setHolidays(this.loadHolidays());
+        const perr = Round.pickupError(b.pickupDate, Round.minPickup());
+        if (perr) throw appError(perr, 'VALIDATION');
         const active = rows.find(r => !CONFIG.CLOSED_STATUSES.includes(r.status) && r.studentId === b.studentId);
         if (active) throw appError('มีคำร้องเลขที่ ' + active.requestId + ' (รหัส ' + active.studentId + ') ที่ยังดำเนินการอยู่ กรุณารอให้เสร็จก่อนยื่นใหม่', 'DUPLICATE');
         const p = Round.bangkokParts(new Date());
@@ -89,11 +168,11 @@ const Demo = {
         rows.push({
           requestId, createdAt: now, updatedAt: now, displayName: 'ผู้ทดลองใช้',
           prefix: b.prefix, firstName: b.firstName, lastName: b.lastName, studentId: b.studentId, phone: b.phone,
-          deliveryRound, status, note: '',
+          deliveryRound, pickupDate: b.pickupDate, status, note: '',
           history: [{ at: now, status, note: 'ยื่นคำร้อง (รอบจัดส่ง ' + Round.thai(deliveryRound) + ')', by: 'ผู้ยื่นคำร้อง' }],
         });
         this.save(rows);
-        return { requestId, status, deliveryRound };
+        return { requestId, status, deliveryRound, pickupDate: b.pickupDate };
       }
       case 'myRequests':
         return rows.slice().reverse();
@@ -107,12 +186,15 @@ const Demo = {
         admin();
         const r = find(b.requestId);
         const moved = b.deliveryRound && b.deliveryRound !== r.deliveryRound;
+        const repick = b.pickupDate && b.pickupDate !== r.pickupDate;
         r.status = b.status;
         r.note = b.note || '';
         if (b.deliveryRound) r.deliveryRound = b.deliveryRound;
+        if (b.pickupDate) r.pickupDate = b.pickupDate;
         r.updatedAt = now;
         r.history.push({ at: now, status: b.status, by: 'ผู้ดูแล', notified: b.notify !== false,
-          note: [r.note, moved ? 'เปลี่ยนรอบจัดส่งเป็น ' + Round.thai(b.deliveryRound) : ''].filter(Boolean).join(' · ') });
+          note: [r.note, moved ? 'เปลี่ยนรอบจัดส่งเป็น ' + Round.thai(b.deliveryRound) : '',
+            repick ? 'เปลี่ยนวันนัดรับเป็น ' + Round.thai(b.pickupDate) : ''].filter(Boolean).join(' · ') });
         this.save(rows);
         return r;
       }

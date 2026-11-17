@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>ขอรับปริญญาบัตร วังท่าพระ</title>
-  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="styles.css?v=3">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="config.js?v=2"></script>
-  <script src="common.js?v=2"></script>
+  <script src="config.js?v=3"></script>
+  <script src="common.js?v=3"></script>
 </head>
 <body>
   <header class="topbar">
@@ -87,6 +87,17 @@
           </div>
 
           <div class="card q-card">
+            <label class="q-title" for="pickupDate">วันที่จะเข้าไปรับปริญญาบัตร <span class="req">*</span></label>
+            <div class="q-desc">รับได้วันจันทร์–ศุกร์ ในเวลาราชการ · <b>งดรับวันเสาร์-อาทิตย์ วันหยุดราชการ และวันหยุดนักขัตฤกษ์</b></div>
+            <input class="input" id="pickupDate" type="date" required>
+            <div class="pickup-hint" id="pickupHint"></div>
+            <details class="holiday-list" id="holidayBox" hidden>
+              <summary>ดูวันหยุดที่งดรับ</summary>
+              <ul id="holidayList"></ul>
+            </details>
+          </div>
+
+          <div class="card q-card">
             <label class="ack">
               <input type="checkbox" id="ack">
               <span>ข้าพเจ้ารับทราบเอกสารที่ต้องนำมาในวันรับปริญญาบัตร <span class="req">*</span></span>
@@ -106,6 +117,6 @@
     </section>
   </main>
 
-  <script src="user.js?v=2"></script>
+  <script src="user.js?v=3"></script>
 </body>
 </html>

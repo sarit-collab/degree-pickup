@@ -14,6 +14,8 @@ window.CONFIG = {
   CLOSED_STATUSES: ['รับปริญญาบัตรแล้ว', 'ไม่อนุมัติ'],
 
   CUTOFF_HOUR: 9, // ส่งหลัง 09:00 น. → รอบวันทำการถัดไป (ต้องตรงกับ Code.gs)
+  PICKUP_MAX_DAYS: 90, // เลือกวันนัดรับได้ไม่เกินกี่วันข้างหน้า (ต้องตรงกับ Code.gs)
   REFRESH_SECONDS: 30,
 };
-CONFIG.DEMO = !CONFIG.API_URL;
+// เปิดโหมดทดลองได้ด้วยการเติม ?demo ท้ายลิงก์ (ใช้ทดสอบหน้าเว็บโดยไม่แตะข้อมูลจริง)
+CONFIG.DEMO = !CONFIG.API_URL || /[?&]demo\b/.test(location.search);

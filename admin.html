@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ผู้ดูแล · ปริญญาบัตร</title>
-  <link rel="stylesheet" href="styles.css?v=1">
-  <script src="config.js?v=1"></script>
-  <script src="common.js?v=1"></script>
+  <link rel="stylesheet" href="styles.css?v=3">
+  <script src="config.js?v=3"></script>
+  <script src="common.js?v=3"></script>
 </head>
 <body>
   <header class="topbar">
@@ -39,6 +39,7 @@
           <select class="input" id="roundFilter" style="flex:0 1 240px"><option value="">ทุกรอบจัดส่ง</option></select>
           <select class="input" id="sortBy" style="flex:0 1 220px">
             <option value="round">จัดกลุ่มตามรอบจัดส่ง</option>
+            <option value="pickup">จัดกลุ่มตามวันนัดรับ</option>
             <option value="newest">วันที่ยื่น (ล่าสุดก่อน)</option>
             <option value="oldest">วันที่ยื่น (เก่าสุดก่อน)</option>
             <option value="studentId">รหัสนักศึกษา</option>
@@ -46,6 +47,7 @@
           <button class="btn sm" id="refreshBtn" type="button">รีเฟรช</button>
           <button class="btn sm" id="exportBtn" type="button">ส่งออก CSV</button>
           <button class="btn sm" id="printBtn" type="button">🖨️ พิมพ์รายชื่อ</button>
+          <button class="btn sm" id="holidayBtn" type="button">📅 วันหยุด</button>
         </div>
         <div class="bulk-bar" id="bulkBar" hidden>
           <span>เลือก <b id="bulkCount">0</b> รายการ →</span>
@@ -62,7 +64,7 @@
               <tr>
                 <th class="check"><input type="checkbox" id="checkAll" aria-label="เลือกทั้งหมด"></th>
                 <th>เลขที่คำร้อง</th><th>ชื่อ - นามสกุล</th><th>รหัสนักศึกษา</th><th>เบอร์โทร</th>
-                <th>รอบจัดส่ง</th><th>วันที่ยื่น</th><th>สถานะ</th>
+                <th>รอบจัดส่ง</th><th>วันนัดรับ</th><th>วันที่ยื่น</th><th>สถานะ</th>
               </tr>
             </thead>
             <tbody id="rows"></tbody>
@@ -93,6 +95,10 @@
             </div>
           </div>
           <div class="field">
+            <label for="dlgPickup">วันนัดรับ</label>
+            <input class="input" type="date" id="dlgPickup">
+          </div>
+          <div class="field">
             <label for="dlgNote">หมายเหตุ</label>
             <textarea class="input" id="dlgNote" rows="3" maxlength="500" placeholder="เช่น ติดต่อรับได้ที่ห้องงานทะเบียน ในวันและเวลาราชการ"></textarea>
           </div>
@@ -110,6 +116,23 @@
     </div>
   </dialog>
 
-  <script src="admin.js?v=1"></script>
+  <dialog id="holDlg">
+    <div class="dlg-head">
+      <b>📅 วันหยุด (งดรับปริญญาบัตร)</b>
+      <button class="icon-btn" id="holClose" type="button" aria-label="ปิด">✕</button>
+    </div>
+    <div style="padding:20px">
+      <p class="muted small" style="margin-top:0">เสาร์-อาทิตย์งดรับอยู่แล้ว ใส่เฉพาะวันหยุดราชการ/นักขัตฤกษ์ (รวมวันหยุดตามจันทรคติและวันหยุดพิเศษที่ ครม. ประกาศ) — นักศึกษาจะเลือกวันเหล่านี้ไม่ได้ และรอบจัดส่งจะข้ามวันเหล่านี้</p>
+      <form id="holForm" class="hol-add">
+        <input class="input" type="date" id="holDate" required>
+        <input class="input" id="holName" maxlength="150" placeholder="ชื่อวันหยุด เช่น วันมาฆบูชา">
+        <button class="btn primary" type="submit">เพิ่ม</button>
+      </form>
+      <label class="small muted"><input type="checkbox" id="holPast"> แสดงวันที่ผ่านไปแล้ว</label>
+      <table class="hol-table"><tbody id="holRows"></tbody></table>
+    </div>
+  </dialog>
+
+  <script src="admin.js?v=3"></script>
 </body>
 </html>

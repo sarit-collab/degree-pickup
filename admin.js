@@ -34,6 +34,10 @@ function init() {
   $('#bulkSaveBtn').addEventListener('click', () => onBulk(false));
   $('#bulkNotifyBtn').addEventListener('click', () => onBulk(true));
   $('#dlgClose').addEventListener('click', () => $('#dlg').close());
+  $('#holidayBtn').addEventListener('click', openHolidays);
+  $('#holClose').addEventListener('click', () => $('#holDlg').close());
+  $('#holForm').addEventListener('submit', addHoliday);
+  $('#holPast').addEventListener('change', renderHolidays);
   $('#updateForm').addEventListener('submit', onUpdate);
   $('#notifyBtn').addEventListener('click', onNotify);
 
@@ -90,7 +94,7 @@ function logout() {
 }
 
 async function load(silent) {
-  if (!silent) $('#rows').innerHTML = '<tr><td colspan="8"><div class="spinner"></div></td></tr>';
+  if (!silent) $('#rows').innerHTML = '<tr><td colspan="9"><div class="spinner"></div></td></tr>';
   try {
     allRows = await adminCall('adminList');
     $('#lastUpdated').textContent = 'อัปเดตล่าสุด ' + UI.fmt(new Date().toISOString()) +
@@ -129,6 +133,8 @@ function filtered() {
     if (by === 'studentId') return String(a.studentId).localeCompare(String(b.studentId));
     if (by === 'round' && a.deliveryRound !== b.deliveryRound) return String(b.deliveryRound).localeCompare(String(a.deliveryRound));
     if (by === 'round') return time(a) - time(b);
+    if (by === 'pickup' && a.pickupDate !== b.pickupDate) return String(a.pickupDate || '9999').localeCompare(String(b.pickupDate || '9999'));
+    if (by === 'pickup') return time(a) - time(b);
     return time(b) - time(a);
   });
 }
@@ -154,17 +160,22 @@ function render() {
 
   const rows = filtered();
   $('#emptyBox').hidden = rows.length > 0;
-  const grouped = $('#sortBy').value === 'round';
+  const by = $('#sortBy').value;
+  const key = by === 'pickup' ? 'pickupDate' : 'deliveryRound';
+  const grouped = by === 'round' || by === 'pickup';
   const groupCount = {};
-  rows.forEach(r => { groupCount[r.deliveryRound] = (groupCount[r.deliveryRound] || 0) + 1; });
+  rows.forEach(r => { groupCount[r[key]] = (groupCount[r[key]] || 0) + 1; });
   let last = null;
   $('#rows').innerHTML = rows.map((r, i) => {
     let head = '';
-    if (grouped && r.deliveryRound !== last) {
-      last = r.deliveryRound;
-      head = `<tr class="group-row"><td colspan="8">🚚 รอบจัดส่ง ${UI.esc(Round.thai(r.deliveryRound, true))}
-        <span class="muted small">(${groupCount[r.deliveryRound]} รายการ)</span>
-        <button type="button" class="btn sm link" data-select-round="${UI.esc(r.deliveryRound)}">เลือกทั้งรอบ</button></td></tr>`;
+    if (grouped && r[key] !== last) {
+      last = r[key];
+      const label = by === 'pickup'
+        ? '📅 นัดรับ ' + (r.pickupDate ? Round.thai(r.pickupDate, true) : 'ไม่ระบุ')
+        : '🚚 รอบจัดส่ง ' + Round.thai(r.deliveryRound, true);
+      head = `<tr class="group-row"><td colspan="9">${UI.esc(label)}
+        <span class="muted small">(${groupCount[r[key]]} รายการ)</span>
+        <button type="button" class="btn sm link" data-select-group="${UI.esc(r[key] || '')}">เลือกทั้งกลุ่ม</button></td></tr>`;
     }
     return head + `
     <tr data-id="${UI.esc(r.requestId)}">
@@ -174,6 +185,7 @@ function render() {
       <td data-label="รหัสนักศึกษา">${UI.esc(r.studentId)}</td>
       <td data-label="โทร">${UI.esc(r.phone)}</td>
       <td data-label="รอบจัดส่ง">${UI.esc(Round.thai(r.deliveryRound))}</td>
+      <td data-label="วันนัดรับ"><b>${UI.esc(r.pickupDate ? Round.thai(r.pickupDate) : '-')}</b></td>
       <td data-label="วันที่ยื่น">${UI.esc(UI.fmt(r.createdAt))}</td>
       <td>${UI.badge(r.status)}</td>
     </tr>`;
@@ -187,8 +199,8 @@ function render() {
     if (cb.checked) selected.add(cb.dataset.check); else selected.delete(cb.dataset.check);
     renderBulk(rows);
   }));
-  $('#rows').querySelectorAll('[data-select-round]').forEach(btn => btn.addEventListener('click', () => {
-    rows.filter(r => r.deliveryRound === btn.dataset.selectRound).forEach(r => selected.add(r.requestId));
+  $('#rows').querySelectorAll('[data-select-group]').forEach(btn => btn.addEventListener('click', () => {
+    rows.filter(r => (r[key] || '') === btn.dataset.selectGroup).forEach(r => selected.add(r.requestId));
     render();
   }));
   renderBulk(rows);
@@ -239,11 +251,13 @@ function openDetail(id) {
     <dt>รหัส นศ.</dt><dd>${UI.esc(r.studentId)}</dd>
     <dt>โทรศัพท์</dt><dd><a href="tel:${UI.esc(r.phone)}">${UI.esc(r.phone)}</a></dd>
     <dt>รอบจัดส่ง</dt><dd>${UI.esc(Round.thai(r.deliveryRound, true))}</dd>
+    <dt>วันนัดรับ</dt><dd><b>${UI.esc(r.pickupDate ? Round.thai(r.pickupDate, true) : '-')}</b></dd>
     <dt>LINE</dt><dd>${UI.esc(r.displayName || '-')}</dd>
     <dt>วันที่ยื่น</dt><dd>${UI.esc(UI.fmt(r.createdAt))}</dd>
     <dt>อัปเดต</dt><dd>${UI.esc(UI.fmt(r.updatedAt))}</dd>`;
   $('#dlgStatus').value = r.status;
   $('#dlgRound').value = r.deliveryRound || '';
+  $('#dlgPickup').value = r.pickupDate || '';
   $('#dlgNote').value = '';
   $('#dlgHistory').innerHTML = UI.historyHtml(r.history);
   $('#dlg').showModal();
@@ -255,11 +269,14 @@ function formData() {
     status: $('#dlgStatus').value,
     note: $('#dlgNote').value.trim(),
     deliveryRound: $('#dlgRound').value,
+    pickupDate: $('#dlgPickup').value,
   };
 }
 
 function hasChange(d) {
-  return d.status !== current.status || d.note || (d.deliveryRound && d.deliveryRound !== current.deliveryRound);
+  return d.status !== current.status || d.note ||
+    (d.deliveryRound && d.deliveryRound !== current.deliveryRound) ||
+    (d.pickupDate && d.pickupDate !== (current.pickupDate || ''));
 }
 
 /** ปุ่ม "บันทึก": เก็บสถานะ/หมายเหตุ/รอบ โดยไม่ส่ง LINE */
@@ -268,7 +285,7 @@ async function onUpdate(e) {
   if (!current) return;
   const d = formData();
   if (!hasChange(d)) {
-    UI.toast('กรุณาเปลี่ยนสถานะ รอบจัดส่ง หรือใส่หมายเหตุ', 'error');
+    UI.toast('กรุณาเปลี่ยนสถานะ รอบจัดส่ง วันนัดรับ หรือใส่หมายเหตุ', 'error');
     return;
   }
   await submitUpdate('adminUpdate', Object.assign(d, { notify: false }),
@@ -305,6 +322,61 @@ async function submitUpdate(action, data, btn, doneMsg) {
   }
 }
 
+// ===== วันหยุด =====
+let holidayRows = [];
+
+async function openHolidays() {
+  $('#holRows').innerHTML = '<tr><td><div class="spinner"></div></td></tr>';
+  $('#holDlg').showModal();
+  try {
+    holidayRows = await adminCall('adminHolidays');
+    renderHolidays();
+  } catch (err) {
+    UI.toast(err.message, 'error');
+  }
+}
+
+function renderHolidays() {
+  const today = Round.today();
+  const list = $('#holPast').checked ? holidayRows : holidayRows.filter(h => h.date >= today);
+  $('#holRows').innerHTML = list.length ? list.map(h => `
+    <tr>
+      <td style="white-space:nowrap">${UI.esc(Round.thai(h.date, true))}</td>
+      <td>${UI.esc(h.name)}</td>
+      <td style="text-align:right"><button type="button" class="btn sm" data-del="${UI.esc(h.date)}">ลบ</button></td>
+    </tr>`).join('') : '<tr><td class="muted">ยังไม่มีวันหยุด</td></tr>';
+  $('#holRows').querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async () => {
+    if (!confirm('ลบวันหยุด ' + Round.thai(b.dataset.del, true) + ' ใช่ไหม')) return;
+    b.disabled = true;
+    try {
+      holidayRows = await adminCall('adminDeleteHoliday', { date: b.dataset.del });
+      renderHolidays();
+    } catch (err) {
+      UI.toast(err.message, 'error');
+      b.disabled = false;
+    }
+  }));
+}
+
+async function addHoliday(e) {
+  e.preventDefault();
+  const date = $('#holDate').value;
+  if (!date) return;
+  const btn = $('#holForm').querySelector('button');
+  btn.disabled = true;
+  try {
+    holidayRows = await adminCall('adminAddHoliday', { date, name: $('#holName').value.trim() });
+    $('#holDate').value = '';
+    $('#holName').value = '';
+    renderHolidays();
+    UI.toast('เพิ่มวันหยุดแล้ว', 'success');
+  } catch (err) {
+    UI.toast(err.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 function printList() {
   const round = $('#roundFilter').value;
   $('#printTitle').textContent = 'รายชื่อขอรับปริญญาบัตร ที่วังท่าพระ' +
@@ -316,7 +388,7 @@ function printList() {
 function exportCsv() {
   const rows = filtered();
   const head = ['เลขที่คำร้อง', 'วันที่ยื่น', 'คำนำหน้า', 'ชื่อ', 'นามสกุล', 'รหัสนักศึกษา', 'เบอร์โทร',
-    'รอบจัดส่ง', 'สถานะ', 'หมายเหตุ', 'อัปเดตล่าสุด', 'ชื่อ LINE'];
+    'รอบจัดส่ง', 'วันนัดรับ', 'สถานะ', 'หมายเหตุ', 'อัปเดตล่าสุด', 'ชื่อ LINE'];
   const cell = v => {
     let s = String(v == null ? '' : v);
     if (/^[=+\-@]/.test(s)) s = "'" + s;
@@ -324,7 +396,7 @@ function exportCsv() {
   };
   const lines = [head.map(cell).join(',')].concat(rows.map(r => [
     r.requestId, UI.fmt(r.createdAt), r.prefix, r.firstName, r.lastName, r.studentId, r.phone,
-    Round.thai(r.deliveryRound), r.status, r.note, UI.fmt(r.updatedAt), r.displayName,
+    Round.thai(r.deliveryRound), r.pickupDate ? Round.thai(r.pickupDate) : '', r.status, r.note, UI.fmt(r.updatedAt), r.displayName,
   ].map(cell).join(',')));
   const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');

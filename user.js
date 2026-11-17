@@ -11,6 +11,7 @@ async function init() {
   bindEvents();
   showRound();
   setInterval(showRound, 60000);
+  loadConfig();
 
   if (CONFIG.DEMO) {
     idToken = 'demo-user';
@@ -43,6 +44,34 @@ function show(view) {
 
 function showRound() {
   $('#roundBox').textContent = '🚚 ถ้าส่งตอนนี้ จะจัดส่งรอบ ' + Round.thai(Round.of(new Date()), true);
+  const min = Round.minPickup();
+  const input = $('#pickupDate');
+  input.min = min;
+  input.max = Round.add(min, CONFIG.PICKUP_MAX_DAYS);
+  $('#pickupHint').textContent = 'เลือกได้ตั้งแต่ ' + Round.thai(min, true) + ' เป็นต้นไป';
+}
+
+/** โหลดวันหยุดจากเซิร์ฟเวอร์ (ไม่ต้องล็อกอิน) แล้วคำนวณวันที่เลือกได้ใหม่ */
+async function loadConfig() {
+  try {
+    const cfg = await Api.call('publicConfig');
+    Round.setHolidays(cfg.holidays);
+    showRound();
+    const upcoming = cfg.holidays.filter(h => h.date >= Round.today());
+    $('#holidayBox').hidden = !upcoming.length;
+    $('#holidayList').innerHTML = upcoming.slice(0, 30).map(h =>
+      `<li>${UI.esc(Round.thai(h.date, true))} — ${UI.esc(h.name)}</li>`).join('');
+    if ($('#pickupDate').value) checkPickup();
+  } catch (e) {
+    UI.toast('โหลดรายการวันหยุดไม่สำเร็จ: ' + e.message, 'error');
+  }
+}
+
+function checkPickup() {
+  const el = $('#pickupDate');
+  const msg = el.value ? Round.pickupError(el.value, Round.minPickup()) : '';
+  if (msg) setError(el, msg); else clearError(el);
+  return msg;
 }
 
 function showApp(profile) {
@@ -94,8 +123,9 @@ function bindEvents() {
   });
   $('#studentId').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, ''); });
   $('#reqForm').addEventListener('submit', onSubmit);
-  $('#reqForm').addEventListener('input', e => clearError(e.target));
-  $('#reqForm').addEventListener('change', e => clearError(e.target));
+  $('#reqForm').addEventListener('input', e => { if (e.target.id !== 'pickupDate') clearError(e.target); });
+  $('#reqForm').addEventListener('change', e => { if (e.target.id !== 'pickupDate') clearError(e.target); });
+  $('#pickupDate').addEventListener('change', checkPickup);
   $('#clearBtn').addEventListener('click', () => {
     if (confirm('ล้างคำตอบทั้งหมดในแบบฟอร์มใช่ไหม')) resetForm();
   });
@@ -148,6 +178,7 @@ async function onSubmit(e) {
     lastName: $('#lastName').value.trim(),
     studentId: $('#studentId').value.trim(),
     phone: $('#phone').value.replace(/[\s-]/g, ''),
+    pickupDate: $('#pickupDate').value,
   };
   const REQUIRED = 'นี่เป็นคำถามที่จำเป็น';
   const checks = [
@@ -155,6 +186,7 @@ async function onSubmit(e) {
     [$('#firstName'), data.firstName && data.lastName ? '' : 'กรุณากรอกทั้งชื่อและนามสกุล'],
     [$('#studentId'), !data.studentId ? REQUIRED : !/^\d{8,12}$/.test(data.studentId) ? 'รหัสนักศึกษาต้องเป็นตัวเลข 8–12 หลัก' : ''],
     [$('#phone'), !data.phone ? REQUIRED : !/^0\d{8,9}$/.test(data.phone) ? 'กรุณากรอกเบอร์โทรศัพท์ 9–10 หลัก ขึ้นต้นด้วย 0' : ''],
+    [$('#pickupDate'), !data.pickupDate ? 'กรุณาเลือกวันที่จะเข้าไปรับ' : Round.pickupError(data.pickupDate, Round.minPickup())],
     [$('#ack'), $('#ack').checked ? '' : 'กรุณาติ๊กรับทราบ'],
   ];
   let firstBad = null;
@@ -179,7 +211,8 @@ async function onSubmit(e) {
     resetForm();
     const box = $('#successBox');
     box.innerHTML = `✅ ส่งคำร้องเรียบร้อยแล้ว<br>เลขที่คำร้อง <b>${UI.esc(res.requestId)}</b> · ` +
-      `จัดส่งรอบ <b>${UI.esc(Round.thai(res.deliveryRound, true))}</b><br>ระบบจะแจ้งเตือนสถานะทาง LINE`;
+      `จัดส่งรอบ <b>${UI.esc(Round.thai(res.deliveryRound, true))}</b><br>` +
+      `วันที่นัดรับ <b>${UI.esc(Round.thai(res.pickupDate, true))}</b> · ระบบจะแจ้งเตือนสถานะทาง LINE`;
     box.hidden = false;
     window.scrollTo({ top: 0, behavior: 'smooth' });
     await loadMine(true);
@@ -233,6 +266,7 @@ function renderMine() {
         ${steps}
         <div style="margin-top:8px">${UI.esc(UI.fullName(r))} · ${UI.esc(r.studentId)}</div>
         <div class="muted small">รอบจัดส่ง: ${UI.esc(Round.thai(r.deliveryRound, true))}</div>
+        ${r.pickupDate ? `<div class="small"><b>วันที่นัดรับ: ${UI.esc(Round.thai(r.pickupDate, true))}</b></div>` : ''}
         ${r.status === 'พร้อมรับที่วังท่าพระ' ? `<div class="note-box">🎉 รับได้ที่กองบริหารงานวิชาการ วังท่าพระ ในวันและเวลาราชการ — อย่าลืมนำสำเนาบัตรประชาชนมาด้วย</div>` : ''}
         ${r.note ? `<div class="note-box">หมายเหตุจากเจ้าหน้าที่: ${UI.esc(r.note)}</div>` : ''}
         <details data-id="${UI.esc(r.requestId)}">

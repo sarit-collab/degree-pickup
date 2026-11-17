@@ -265,6 +265,19 @@ td.check input, th.check input { width: 18px; height: 18px; accent-color: var(--
 .bulk-bar .input { flex: 0 1 240px; min-width: 160px; }
 .bulk-bar b { color: var(--primary); }
 .print-only { display: none; }
+.pickup-hint { font-size: .875rem; color: var(--primary); margin-top: 8px; font-weight: 600; }
+.holiday-list { margin-top: 10px; }
+.holiday-list ul { margin: 8px 0 0; padding-left: 20px; font-size: .875rem; color: var(--muted); max-height: 200px; overflow: auto; }
+.hol-table { width: 100%; }
+.hol-table td { padding: 6px 8px; }
+.hol-table tbody tr { cursor: default; }
+@media (max-width: 720px) {
+  .hol-table tbody tr { display: flex !important; align-items: center; gap: 8px; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; margin: 0; padding: 4px 0; }
+  .hol-table td { width: auto; padding: 4px; }
+  .hol-table td:nth-child(2) { flex: 1; }
+}
+.hol-add { display: grid; grid-template-columns: 160px 1fr auto; gap: 8px; margin-bottom: 12px; }
+@media (max-width: 520px) { .hol-add { grid-template-columns: 1fr; } }
 @media (max-width: 720px) {
   td.check { padding-top: 8px; }
 }
