@@ -4,7 +4,7 @@
 // ถ้าเว้น API_URL ว่างไว้ ระบบจะทำงานใน "โหมดทดลอง" (เก็บข้อมูลในเบราว์เซอร์นี้เท่านั้น, รหัสผู้ดูแล = admin)
 window.CONFIG = {
   API_URL: 'https://script.google.com/macros/s/AKfycbwDwNwGVI67E2t9bF7vATjHNof82RzqB2L6UO8EZ3Zmb5QtkPrI4v2--AqNz5uy_yKZKw/exec',
-  LIFF_ID: '',
+  LIFF_ID: '2012119896-j1mZ4ZwT',
 
   // ต้องตรงกับ PREFIXES ใน Code.gs (เลือก "อื่น ๆ" แล้วพิมพ์เองได้)
   PREFIXES: ['นาย', 'นาง', 'นางสาว'],
